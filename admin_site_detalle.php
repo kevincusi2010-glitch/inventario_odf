@@ -21,85 +21,34 @@ if (!$id_site) {
     exit;
 }
 
-$siteRow = $pdo->prepare("SELECT * FROM Site WHERE id_site = ?");
-$siteRow->execute([$id_site]);
-$siteActual = $siteRow->fetch();
-if (!$siteActual) {
+$siteDao = new \App\Daos\MySqlSiteDao($pdo);
+$cableDao = new \App\Daos\MySqlCableDao($pdo);
+$odfDao = new \App\Daos\MySqlOdfDao($pdo);
+$puertoDao = new \App\Daos\MySqlPuertoDao($pdo);
+$treeBuilder = new \App\Services\InfraestructuraTreeBuilder();
+
+$site = $siteDao->findById((int)$id_site);
+if (!$site) {
     header("Location: admin_infraestructura.php");
     exit;
 }
 
-$cables = $pdo->prepare("SELECT *, CONCAT_WS(' → ', origen, destino) AS tipo_cable FROM CableAlimentacion WHERE id_site = ? AND activo = 1 ORDER BY id_cable");
-$cables->execute([$id_site]);
-$cables = $cables->fetchAll();
+$siteActual = $site->toArray();
+$cables = $cableDao->findBySiteId((int)$id_site);
+$odfsData = $odfDao->findBySiteId((int)$id_site);
+$odfs = array_column($odfsData, 'raw');
 
-$odfsRaw = $pdo->prepare("SELECT o.*, s.nombre as site_nombre FROM ODF o JOIN Site s ON o.id_site = s.id_site WHERE o.id_site = ? AND o.activo = 1 ORDER BY o.id_odf ASC");
-$odfsRaw->execute([$id_site]);
-$odfsRaw = $odfsRaw->fetchAll();
-
-$odfs = [];
-$odfIndex = 1;
-foreach ($odfsRaw as $o) {
-    $o['local_index'] = $odfIndex++;
-    $odfs[] = $o;
+// Obtener puertos de los ODFs de la sede mediante DAO
+$odfIds = array_column($odfs, 'id_odf');
+$ports = [];
+foreach ($odfIds as $oId) {
+    foreach ($puertoDao->findByOdfId((int)$oId) as $p) {
+        $ports[] = $p->toArray();
+    }
 }
 
-$portsStmt = $pdo->prepare("SELECT id_puerto, id_odf, posicion, id_cable_conectado, numero_hilo FROM Puerto WHERE id_odf IN (SELECT id_odf FROM ODF WHERE id_site = ?)");
-$portsStmt->execute([$id_site]);
-$ports = $portsStmt->fetchAll();
-
-$tree = [];
-$siteId = $id_site;
-$tree[$siteId] = [ 'info' => $siteActual, 'racks' => [], 'cables_sueltos' => [] ];
-
-// Racks
-    $rackList = array_unique(array_column(array_filter($odfs, fn($o) => $o['id_site'] == $siteId), 'ubicacion_rack'));
-    
-    foreach ($rackList as $rack) {
-        $tree[$siteId]['racks'][$rack] = [ 'cables' => [] ];
-        $rackOdfs = array_filter($odfs, fn($o) => $o['id_site'] == $siteId && $o['ubicacion_rack'] == $rack);
-        
-        $rackCableIds = [];
-        $odfsConCable = [];
-        foreach ($rackOdfs as $ro) {
-            $odfPorts = array_filter($ports, fn($p) => $p['id_odf'] == $ro['id_odf']);
-            $hasCable = false;
-            foreach ($odfPorts as $p) {
-                if (!empty($p['id_cable_conectado'])) {
-                    $rackCableIds[] = $p['id_cable_conectado'];
-                    $hasCable = true;
-                }
-            }
-            if ($hasCable) $odfsConCable[] = $ro['id_odf'];
-        }
-        $rackCableIds = array_unique($rackCableIds);
-        
-        foreach ($rackCableIds as $cid) {
-            $cableInfo = array_values(array_filter($cables, fn($c) => $c['id_cable'] == $cid))[0] ?? null;
-            if ($cableInfo) {
-                $tree[$siteId]['racks'][$rack]['cables'][$cid] = [ 'info' => $cableInfo, 'odfs' => [] ];
-                foreach ($rackOdfs as $ro) {
-                    $isConnected = count(array_filter($ports, fn($p) => $p['id_odf'] == $ro['id_odf'] && $p['id_cable_conectado'] == $cid)) > 0;
-                    if ($isConnected) $tree[$siteId]['racks'][$rack]['cables'][$cid]['odfs'][] = $ro;
-                }
-            }
-        }
-        
-        // ODFs del rack que todavía no están empalmados a ningún cable
-        $odfsSinCable = array_filter($rackOdfs, fn($ro) => !in_array($ro['id_odf'], $odfsConCable));
-        if (count($odfsSinCable) > 0) {
-            $tree[$siteId]['racks'][$rack]['cables']['none'] = [ 'info' => ['id_cable'=>'none', 'origen'=>'[ODFs sin Cables asignados]', 'destino'=>null, 'tipo_cable'=>'[ODFs sin Cables asignados]'], 'odfs' => $odfsSinCable ];
-        }
-    }
-    
-    // Cables registrados en la sede que aún no alimentan a ningún ODF
-    $siteCables = array_filter($cables, fn($c) => $c['id_site'] == $siteId);
-    $connectedCableIds = array_unique(array_column(array_filter($ports, fn($p) => !empty($p['id_cable_conectado'])), 'id_cable_conectado'));
-    foreach ($siteCables as $sc) {
-        if (!in_array($sc['id_cable'], $connectedCableIds)) {
-            $tree[$siteId]['cables_sueltos'][] = $sc;
-        }
-    }
+// Armado limpio del árbol jerárquico mediante el servicio de dominio
+$tree = [$id_site => $treeBuilder->buildTree($siteActual, $odfs, $cables, $ports)];
 
 require_once 'views/header.php';
 ?>

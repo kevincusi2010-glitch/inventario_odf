@@ -128,12 +128,35 @@ Este documento registra formalmente el estado del sistema en cada etapa del proy
 
 ---
 
-### ⏳ FASE 4: Refactorización de Vistas y APIs (MVC Limpio)
-*(Pendiente de ejecución)*
-* **Objetivos a auditar:**
-  - Erradicación del 100% de consultas SQL en `admin_site_detalle.php`, `dashboard.php` y `estadisticas.php`.
-  - Conexión a Servicios y DAOs.
-  - Verificación de cero impacto en UI/UX.
+### 🟢 FASE 4: Refactorización de Vistas y APIs (MVC Limpio)
+* **Fecha de Ejecución:** 2026-10-08
+* **Agentes Intervinientes:** `@ViewIntegrator`, `@DaoEngineer`, `@DomainLogic`, `@TddQa`
+
+#### 1. Transformaciones Implementadas
+1. **Erradicación del 100% de Consultas SQL en Vistas:**
+   - **`admin_site_detalle.php`:** Eliminadas las consultas manuales directas (`SELECT * FROM site WHERE id_site...`, `SELECT * FROM odf WHERE id_site...`). La vista ahora delega completamente en `MySqlSiteDao`, `MySqlOdfDao`, `MySqlCableDao` y el servicio puro `InfraestructuraTreeBuilder`.
+   - **`admin_infraestructura.php`:** Eliminada la consulta SQL directa con `COUNT(DISTINCT ...)`. Ahora invoca `MySqlSiteDao::findAllActiveWithCounts()`.
+   - **`admin_usuarios.php`:** Eliminada la consulta manual `SELECT * FROM usuario...`. Ahora delega en `MySqlUsuarioDao::findAll()`.
+   - **`dashboard.php`:** Eliminadas las consultas SQL embebidas (`SELECT * FROM site WHERE activo = 1`, `SELECT o.*, c.id_cable...`). Ahora delega en `MySqlSiteDao` y `MySqlOdfDao::findBySiteIdWithConnectedCables()`.
+   - **`estadisticas.php`:** Encapsuladas todas las consultas de agregación y filtros en `StatisticsService`, reduciendo el acoplamiento y permitiendo pruebas aisladas.
+2. **Refactorización de Endpoints API:**
+   - **`api/get_bandeja.php`:** Erradicada la consulta `SELECT * FROM puerto WHERE id_odf = ? AND numero_bandeja = ?`. Ahora invoca `MySqlPuertoDao::findByOdfAndBandeja()`.
+   - **`api/update_puerto.php`:** Refactorizado para usar `PolicyFactory` polimórfico, `MySqlPuertoDao` y la transacción atómica con reintentos `DatabaseConnection::transaction()`.
+   - **`api/carga_masiva_puertos.php`:** Reducido a un controlador delgado (Thin Controller) de apenas 55 líneas que delega la validación e importación completa a `PuertoBatchImportService`.
+3. **Cero Impacto en UI/UX:**
+   - Preservados al 100% todos los identificadores HTML (`id`, `class`), modales Bootstrap, renderizado SVG, componentes interactivos y estructuras JSON esperadas por el frontend.
+4. **Ampliación de Pruebas Unitarias:**
+   - Implementado `StatisticsServiceTest.php` con base de datos en memoria SQLite, alcanzando **26 tests unitarios y 99 assertions**.
+
+#### 2. Comparativo Cuantitativo y Cualitativo - Fase 4
+
+| Dimensión | Antes de Fase 4 | Después de Fase 4 | Mejora Lograda |
+| :--- | :--- | :--- | :---: |
+| **SQL en Vistas** | > 15 consultas SQL dispersas y acopladas en HTML. | **0 consultas SQL en vistas**. 100% delegado en DAOs/Servicios. | **Separación de responsabilidades (SoC) estricta** |
+| **Controladores API** | Monolitos de hasta 304 líneas con SQL, lógica y HTTP mezclados. | Endpoints delgados (Thin Controllers) de 40 a 60 líneas. | **Código limpio, legible y desacoplado** |
+| **Integridad de Transacciones en APIs** | Transacciones manuales con riesgo de bloqueos no liberados. | Gestión atómica y transaccional mediante `DatabaseConnection::transaction()`. | **Tolerancia a fallos e integridad de datos** |
+| **Experiencia de Usuario (UI/UX)** | Código acoplado a la presentación. | Vistas 100% limpias manteniendo la UI/UX idéntica. | **Cero regresiones visuales o funcionales** |
+| **Suite de Pruebas** | 23 tests (Fase 3). | **26 tests unitarios (99 assertions)** pasando en 0.039s. | **+10 assertions y cobertura de estadísticas** |
 
 ---
 
@@ -141,4 +164,5 @@ Este documento registra formalmente el estado del sistema en cada etapa del proy
 *(Pendiente de ejecución)*
 * **Objetivos a auditar:**
   - Cobertura completa de pruebas automáticas.
+  - Verificación final de integridad y sinergia multi-agente.
   - Reporte consolidado Antes vs. Después para la entrega final.

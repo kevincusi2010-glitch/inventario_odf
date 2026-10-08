@@ -11,10 +11,11 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'Administrad
     exit;
 }
 
+require_once 'config/database.php';
 require_once 'classes/Csrf.php';
-require_once 'classes/Usuario.php';
-$usuarioManager = new Usuario();
-$usuarios = $usuarioManager->getAllUsuarios();
+
+$usuarioDao = new \App\Daos\MySqlUsuarioDao($pdo);
+$usuarios = array_map(fn($u) => $u->toArray(), $usuarioDao->findAll());
 
 require_once 'views/header.php';
 ?>

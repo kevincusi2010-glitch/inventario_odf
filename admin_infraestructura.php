@@ -12,10 +12,16 @@ if (!isset($_SESSION['usuario']) || !in_array($_SESSION['usuario']['rol'], ['Adm
 }
 require_once 'config/database.php';
 require_once 'classes/Csrf.php';
-require_once 'classes/Infraestructura.php';
 
-$infra = new Infraestructura();
-$sites = $infra->getSitesWithCounts();
+$siteDao = new \App\Daos\MySqlSiteDao($pdo);
+$sitesWithCounts = $siteDao->findAllActiveWithCounts();
+$sites = [];
+foreach ($sitesWithCounts as $item) {
+    $row = $item['site']->toArray();
+    $row['total_odfs'] = $item['total_odfs'];
+    $row['total_cables'] = $item['total_cables'];
+    $sites[] = $row;
+}
 
 // Colores de badge por tipo de SITE
 $tiposSite = ['PAG' => 'bg-danger', 'AGG' => 'bg-warning text-dark', 'SITE' => 'bg-info text-dark', 'AGG/PAG' => 'bg-primary'];

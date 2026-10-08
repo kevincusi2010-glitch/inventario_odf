@@ -41,6 +41,29 @@ class Infraestructura {
         if ($this->rolActual() !== 'Supervisor') {
             return true;
         }
+        $userId = $_SESSION['usuario']['id_usuario'] ?? null;
+        if ($userId !== null) {
+            $table = match($tipo) {
+                'site' => 'Site',
+                'cable' => 'CableAlimentacion',
+                'odf' => 'ODF',
+                default => null
+            };
+            $pk = match($tipo) {
+                'site' => 'id_site',
+                'cable' => 'id_cable',
+                'odf' => 'id_odf',
+                default => null
+            };
+            if ($table && $pk) {
+                $stmt = $this->pdo->prepare("SELECT creado_por FROM {$table} WHERE {$pk} = ?");
+                $stmt->execute([$id]);
+                $creador = $stmt->fetchColumn();
+                if ($creador !== false && (int)$creador === (int)$userId) {
+                    return true;
+                }
+            }
+        }
         return in_array($id, $_SESSION['creados_en_sesion'][$tipo] ?? []);
     }
 
@@ -62,8 +85,9 @@ class Infraestructura {
         if (!in_array($tipo, self::TIPOS_SITE, true)) {
             throw new Exception("El tipo de SITE seleccionado no es válido.");
         }
-        $stmt = $this->pdo->prepare('INSERT INTO Site (nombre, direccion, departamento, distrito, tipo) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute([$nombre, $direccion, $departamento, $distrito, $tipo]);
+        $userId = $_SESSION['usuario']['id_usuario'] ?? null;
+        $stmt = $this->pdo->prepare('INSERT INTO Site (nombre, direccion, departamento, distrito, tipo, creado_por) VALUES (?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$nombre, $direccion, $departamento, $distrito, $tipo, $userId]);
         $id = $this->pdo->lastInsertId();
         
         $this->trackCreacion('site', $id);
@@ -124,8 +148,9 @@ class Infraestructura {
             throw new Exception("El Cable '$etiqueta' ya pertenece a otra Sede.");
         }
 
-        $stmt = $this->pdo->prepare('INSERT INTO CableAlimentacion (id_site, origen, destino, capacidad_hilos, rack, fecha_instalacion) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->execute([$id_site, $origen, $destino, $capacidad_hilos, $rack, $fecha_instalacion ?: null]);
+        $userId = $_SESSION['usuario']['id_usuario'] ?? null;
+        $stmt = $this->pdo->prepare('INSERT INTO CableAlimentacion (id_site, origen, destino, capacidad_hilos, rack, fecha_instalacion, creado_por) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$id_site, $origen, $destino, $capacidad_hilos, $rack, $fecha_instalacion ?: null, $userId]);
         $id = $this->pdo->lastInsertId();
         
         $this->trackCreacion('cable', $id);
@@ -175,8 +200,9 @@ class Infraestructura {
         // Nota: el rack es una etiqueta POR SEDE (los cuadros de hilos numeran
         // "Rack 1", "Rack 2"... en cada sede), por lo que puede repetirse entre sedes.
 
-        $stmt = $this->pdo->prepare("INSERT INTO ODF (id_site, origen, destino, capacidad_puertos, ubicacion_rack) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$id_site, $origen, $destino, $capacidad_puertos, $ubicacion_rack]);
+        $userId = $_SESSION['usuario']['id_usuario'] ?? null;
+        $stmt = $this->pdo->prepare("INSERT INTO ODF (id_site, origen, destino, capacidad_puertos, ubicacion_rack, creado_por) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$id_site, $origen, $destino, $capacidad_puertos, $ubicacion_rack, $userId]);
         $id_odf = $this->pdo->lastInsertId();
         
         $this->trackCreacion('odf', $id_odf);

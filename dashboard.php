@@ -22,32 +22,13 @@ require_once 'views/header.php';
 $sites = [];
 $dbError = null;
 try {
-    $infra = new Infraestructura();
-    $puertoManager = new Puerto();
-    
-    $sitesStmt = $pdo->query("SELECT id_site, nombre FROM Site WHERE activo = 1 ORDER BY nombre");
-    $sitesData = $sitesStmt->fetchAll();
-    foreach ($sitesData as $row) {
-        $sites[$row['id_site']]['nombre'] = $row['nombre'];
-        
-        // Se listan TODOS los ODF activos de la sede (incluidos los que aún no tienen
-        // cables empalmados): un ODF recién creado debe aparecer aquí para poder
-        // monitorear sus puertos y ejecutar la carga masiva desde el dashboard.
-        $odfsStmt = $pdo->prepare("
-            SELECT o.id_odf, o.origen, o.destino, o.ubicacion_rack,
-                   (SELECT GROUP_CONCAT(DISTINCT CONCAT_WS(' → ', c.origen, c.destino) SEPARATOR ', ') FROM Puerto p JOIN CableAlimentacion c ON p.id_cable_conectado = c.id_cable WHERE p.id_odf = o.id_odf) as cables_conectados
-            FROM ODF o 
-            WHERE o.id_site = ? AND o.activo = 1 
-            ORDER BY o.id_odf ASC
-        ");
-        $odfsStmt->execute([$row['id_site']]);
-        $odfsEnSite = $odfsStmt->fetchAll();
-        $odfIndex = 1;
-        foreach ($odfsEnSite as &$odf) {
-            $odf['local_index'] = $odfIndex++;
-        }
-        unset($odf);
-        $sites[$row['id_site']]['odfs'] = $odfsEnSite;
+    $siteDao = new \App\Daos\MySqlSiteDao($pdo);
+    $odfDao = new \App\Daos\MySqlOdfDao($pdo);
+
+    foreach ($siteDao->findAllActive() as $siteEntity) {
+        $siteId = $siteEntity->idSite;
+        $sites[$siteId]['nombre'] = $siteEntity->nombre;
+        $sites[$siteId]['odfs'] = $odfDao->findBySiteIdWithConnectedCables($siteId);
     }
 } catch (Exception $e) {
     $dbError = "La base de datos no está configurada o está vacía. Por favor, ejecuta la instalación inicial.";

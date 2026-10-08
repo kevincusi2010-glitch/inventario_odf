@@ -39,18 +39,32 @@ if (!$id_puerto || !$nuevo_estado || !in_array($nuevo_estado, $ESTADOS_VALIDOS, 
 }
 
 try {
-    require_once '../classes/Puerto.php';
-    $puertoManager = new Puerto();
+    $puertoDao = new \App\Daos\MySqlPuertoDao($pdo);
+    $policy = \App\Policies\PolicyFactory::forRole($rol);
 
-    // La transacción envuelve al método porque updateEstado() ejecuta un
-    // SELECT ... FOR UPDATE: así la fila del puerto queda bloqueada durante la
-    // validación y se evita que dos técnicos empalmen el mismo hilo a la vez.
-    $pdo = Database::getInstance()->getConnection();
-    $pdo->beginTransaction();
+    \App\Core\DatabaseConnection::transaction($pdo, function () use ($puertoDao, $policy, $id_puerto, $nuevo_estado, $descripcion, $id_usuario) {
+        $puerto = $puertoDao->lockForUpdate((int)$id_puerto);
+        if (!$puerto) {
+            throw new Exception("Puerto no encontrado", 404);
+        }
 
-    $puertoManager->updateEstado($id_puerto, $nuevo_estado, $descripcion, $id_usuario, $rol);
+        if (!$policy->canModifyPort($puerto)) {
+            $msg = ((int)($puerto['bloqueado'] ?? 0) === 1)
+                ? "El puerto está bloqueado y solo puede ser modificado por un Administrador."
+                : "Los técnicos no tienen permisos para modificar un puerto que ya se encuentra 'En Servicio'.";
+            throw new Exception($msg, 403);
+        }
 
-    $pdo->commit();
+        $bloqueado = (int)$puerto['bloqueado'];
+        if ($nuevo_estado === 'Malogrado') {
+            $bloqueado = 1;
+        } elseif ($policy->getRoleName() === 'Administrador') {
+            $bloqueado = 0;
+        }
+
+        $puertoDao->updateEstado((int)$id_puerto, $nuevo_estado, $descripcion, $id_usuario, $bloqueado);
+    });
+
     echo json_encode(['success' => true, 'mensaje' => 'Puerto actualizado correctamente']);
 
 } catch (Exception $e) {

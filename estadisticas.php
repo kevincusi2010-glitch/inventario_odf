@@ -13,100 +13,14 @@ if (!isset($_SESSION['usuario'])) {
 }
 require_once 'config/database.php';
 
-$sites = $pdo->query("SELECT id_site, nombre, departamento FROM Site WHERE activo = 1 ORDER BY nombre")->fetchAll();
+$statsService = new \App\Services\StatisticsService($pdo);
+$sites = $statsService->getSiteList();
 $selected_site = $_GET['id_site'] ?? ($sites[0]['id_site'] ?? null);
 
-$odfsForSite = [];
-if ($selected_site) {
-    $stmt = $pdo->prepare("SELECT id_odf, origen, destino, ubicacion_rack FROM ODF WHERE id_site = ? AND activo = 1 ORDER BY id_odf");
-    $stmt->execute([$selected_site]);
-    $odfsForSite = $stmt->fetchAll();
-}
+$odfsForSite = $selected_site ? $statsService->getOdfsForSite((int)$selected_site) : [];
 $selected_odf = $_GET['id_odf'] ?? null;
 
-$stats = [
-    'total_cables' => 0,
-    'total_odfs' => 0,
-    'capacidad_hilos' => 0,
-    'puertos_totales' => 0,
-    'estado_libre' => 0,
-    'estado_ocupado' => 0,
-    'estado_reservado' => 0,
-    'estado_malogrado' => 0
-];
-
-if ($selected_site) {
-    if ($selected_odf) {
-        // Cables conectados a ESTE ODF (vista cuando se filtra por ODF)
-        $stmt = $pdo->prepare("
-            SELECT COUNT(DISTINCT c.id_cable) as c, SUM(DISTINCT c.capacidad_hilos) as h 
-            FROM CableAlimentacion c 
-            JOIN Puerto p ON c.id_cable = p.id_cable_conectado 
-            WHERE p.id_odf = ? AND c.activo = 1
-        ");
-        $stmt->execute([$selected_odf]);
-        $res = $stmt->fetch();
-        $stats['total_cables'] = (int)$res['c'];
-        
-        // Si dos cables distintos tuvieran la misma capacidad_hilos, SUM(DISTINCT)
-        // la contaría una sola vez y subestimaría el total; por eso la suma se
-        // calcula sobre una subconsulta que deja un único registro por cable.
-        $stmt2 = $pdo->prepare("
-            SELECT SUM(capacidad_hilos) as h FROM (
-                SELECT DISTINCT c.id_cable, c.capacidad_hilos 
-                FROM CableAlimentacion c 
-                JOIN Puerto p ON c.id_cable = p.id_cable_conectado 
-                WHERE p.id_odf = ? AND c.activo = 1
-            ) as distinct_cables
-        ");
-        $stmt2->execute([$selected_odf]);
-        $stats['capacidad_hilos'] = (int)$stmt2->fetchColumn();
-
-        // ODFs
-        $stats['total_odfs'] = 1;
-    } else {
-        // Cables de toda la sede (vista agregada)
-        $stmt = $pdo->prepare("SELECT COUNT(*) as c, SUM(capacidad_hilos) as h FROM CableAlimentacion WHERE id_site = ? AND activo = 1");
-        $stmt->execute([$selected_site]);
-        $res = $stmt->fetch();
-        $stats['total_cables'] = (int)$res['c'];
-        $stats['capacidad_hilos'] = (int)$res['h'];
-        
-        // ODFs de toda la sede (vista agregada)
-        $stmt = $pdo->prepare("SELECT COUNT(*) as c FROM ODF WHERE id_site = ? AND activo = 1");
-        $stmt->execute([$selected_site]);
-        $stats['total_odfs'] = (int)$stmt->fetch()['c'];
-    }
-    
-    // Puertos
-    if ($selected_odf) {
-        $stmt = $pdo->prepare("
-            SELECT p.estado, COUNT(p.id_puerto) as total 
-            FROM Puerto p 
-            WHERE p.id_odf = ?
-            GROUP BY p.estado
-        ");
-        $stmt->execute([$selected_odf]);
-    } else {
-        $stmt = $pdo->prepare("
-            SELECT p.estado, COUNT(p.id_puerto) as total 
-            FROM Puerto p 
-            JOIN ODF o ON p.id_odf = o.id_odf 
-            WHERE o.id_site = ? AND o.activo = 1 
-            GROUP BY p.estado
-        ");
-        $stmt->execute([$selected_site]);
-    }
-    $puertos = $stmt->fetchAll();
-    
-    foreach ($puertos as $p) {
-        $stats['puertos_totales'] += $p['total'];
-        if ($p['estado'] == 'Sin Servicio') $stats['estado_libre'] += $p['total'];
-        if ($p['estado'] == 'En Servicio') $stats['estado_ocupado'] += $p['total'];
-        if ($p['estado'] == 'Reservado') $stats['estado_reservado'] += $p['total'];
-        if ($p['estado'] == 'Malogrado') $stats['estado_malogrado'] += $p['total'];
-    }
-}
+$stats = $statsService->calculateStats((int)$selected_site, $selected_odf ? (int)$selected_odf : null);
 
 require_once 'views/header.php';
 ?>
