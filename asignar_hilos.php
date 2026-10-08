@@ -12,24 +12,34 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'Administrad
     header("Location: dashboard.php");
     exit;
 }
+require_once __DIR__ . '/vendor/autoload.php';
 require_once 'config/database.php';
 require_once 'classes/Csrf.php';
 
-$id_odf = $_GET['id_odf'] ?? null;
+use App\Core\DatabaseConnection;
+use App\Daos\MySqlOdfDao;
+use App\Daos\MySqlSiteDao;
+use App\Daos\MySqlCableDao;
+use App\Daos\MySqlPuertoDao;
+
+$id_odf = isset($_GET['id_odf']) ? (int)$_GET['id_odf'] : null;
 if (!$id_odf) { header("Location: admin_infraestructura.php"); exit; }
 
-$stmt = $pdo->prepare("SELECT o.*, s.nombre as site_nombre FROM ODF o JOIN Site s ON o.id_site = s.id_site WHERE o.id_odf = ?");
-$stmt->execute([$id_odf]);
-$odf = $stmt->fetch();
-if (!$odf) { header("Location: admin_infraestructura.php"); exit; }
+$pdo = DatabaseConnection::getInstance();
+$odfDao = new MySqlOdfDao($pdo);
+$siteDao = new MySqlSiteDao($pdo);
+$cableDao = new MySqlCableDao($pdo);
+$puertoDao = new MySqlPuertoDao($pdo);
 
-$stmt = $pdo->prepare("SELECT *, CONCAT_WS(' → ', origen, destino) AS tipo_cable FROM CableAlimentacion WHERE id_site = ? AND activo = 1 ORDER BY origen");
-$stmt->execute([$odf['id_site']]);
-$cables = $stmt->fetchAll();
+$odfEntity = $odfDao->findById($id_odf);
+if (!$odfEntity) { header("Location: admin_infraestructura.php"); exit; }
 
-$stmt = $pdo->prepare("SELECT * FROM Puerto WHERE id_odf = ? ORDER BY posicion");
-$stmt->execute([$id_odf]);
-$puertos = $stmt->fetchAll();
+$siteEntity = $siteDao->findById($odfEntity->getIdSite());
+$odf = $odfEntity->toArray();
+$odf['site_nombre'] = $siteEntity ? $siteEntity->getNombre() : '';
+
+$cables = $cableDao->findBySiteId($odfEntity->getIdSite());
+$puertos = $puertoDao->findByOdfId($id_odf);
 
 // Hilos ya utilizados por OTROS ODFs de la misma sede (validación anti-colisión)
 $stmtUsed = $pdo->prepare("
@@ -38,7 +48,7 @@ $stmtUsed = $pdo->prepare("
     JOIN ODF o ON p.id_odf = o.id_odf
     WHERE o.id_site = ? AND p.id_cable_conectado IS NOT NULL AND p.numero_hilo IS NOT NULL
 ");
-$stmtUsed->execute([$odf['id_site']]);
+$stmtUsed->execute([$odfEntity->getIdSite()]);
 $usedThreads = [];
 foreach ($stmtUsed->fetchAll() as $row) {
     if ($row['id_odf'] != $id_odf) {
