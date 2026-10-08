@@ -1,0 +1,16 @@
+# Dependencias de terceros
+/vendor/
+composer.phar
+
+# Variables de entorno y secretos
+.env
+
+# Logs y telemetría
+/logs/*.log
+!/logs/.gitkeep
+
+# Cache de pruebas
+.phpunit.result.cache
+
+# Entornos virtuales locales
+/.venv/

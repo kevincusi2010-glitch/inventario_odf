@@ -1,0 +1,5 @@
+puerto,estado,descripcion,cable_origen,cable_destino,numero_hilo
+1,En Servicio,Servicio EMPRESA A,0100374_LM_Zapallal,0100512_LM_Ventanilla_Pachacutec,1
+2,En Servicio,Servicio EMPRESA B,0100374_LM_Zapallal,0100512_LM_Ventanilla_Pachacutec,2
+3,Reservado,Reserva cliente C,,,
+5,Malogrado,Puerto con fibra dañada,,,
