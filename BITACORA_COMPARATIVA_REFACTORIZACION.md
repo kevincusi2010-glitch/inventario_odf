@@ -94,13 +94,37 @@ Este documento registra formalmente el estado del sistema en cada etapa del proy
 
 ---
 
-### ⏳ FASE 3: Lógica de Dominio, Polimorfismo y Patrón Strategy
-*(Pendiente de ejecución)*
-* **Objetivos a auditar:**
-  - Extracción del árbol topológico de `admin_site_detalle.php` a `InfraestructuraTreeBuilder`.
-  - `SpreadsheetReaderInterface` (CSV y XLSX polimórficos).
-  - `RolePolicyInterface` (Políticas de rol sin condicionales).
-  - `PuertoBatchImportService`.
+### 🟢 FASE 3: Lógica de Dominio, Polimorfismo y Patrón Strategy
+* **Fecha de Ejecución:** 2026-10-08
+* **Agentes Intervinientes:** `@Architect`, `@DomainLogic`, `@TddQa`
+
+#### 1. Transformaciones Implementadas
+1. **Patrón Strategy para Lectura de Hojas de Cálculo:**
+   - Creado contrato `SpreadsheetReaderInterface.php`.
+   - Implementadas estrategias polimórficas `CsvReader.php` y `XlsxReader.php` gestionadas por `ReaderFactory.php`.
+   - Eliminados bloques de tipo `if ($ext === 'csv')` y funciones procedurales embebidas.
+2. **Políticas de Autorización Polimórficas (Open/Closed Principle - OCP):**
+   - Creado contrato `RolePolicyInterface.php`.
+   - Implementadas políticas `AdminPolicy`, `SupervisorPolicy` y `TecnicoPolicy` con `PolicyFactory`.
+   - Erradicados los condicionales anidados de comprobación de cadenas por rol (`if ($rol === 'Tecnico' && ...)`). La regla de supervisor ahora valida contra la autoría real en BD (`$creatorUserId === $currentUserId`).
+3. **Servicio Puro del Árbol Topológico (`InfraestructuraTreeBuilder`):**
+   - Encapsulado el algoritmo de más de 50 líneas de manipulación de jerarquías que estaba dentro de `admin_site_detalle.php`.
+   - Servicio 100% puro, sin dependencias de base de datos ni de sesión web.
+4. **Servicio de Carga Masiva Atómica (`PuertoBatchImportService`):**
+   - Extraída la lógica monolítica de más de 300 líneas de `api/carga_masiva_puertos.php`.
+   - Orquesta la validación en dos fases con políticas polimórficas y transacciones atómicas "todo o nada".
+5. **Suite de Pruebas Unitarias de Dominio y Polimorfismo:**
+   - Añadidos tests unitarios en `tests/Unit/Services/` y `tests/Unit/Policies/` alcanzando **23 tests y 89 assertions**.
+
+#### 2. Comparativo Cuantitativo y Cualitativo - Fase 3
+
+| Dimensión | Antes de Fase 3 | Después de Fase 3 | Mejora Lograda |
+| :--- | :--- | :--- | :---: |
+| **Polimorfismo** | 0 interfaces. Variabilidad resuelta por cadenas de texto y condicionales `if/else`. | Contratos polimórficos para lectores (`SpreadsheetReaderInterface`) y roles (`RolePolicyInterface`). | **Principio Open/Closed (OCP) activo** |
+| **Lógica de Árbol Topológico** | 53 líneas de código algorítmico incrustado en la vista `admin_site_detalle.php`. | Encapsulado en servicio testeable `InfraestructuraTreeBuilder`. | **Principio Single Responsibility (SRP)** |
+| **Lectores de Archivos** | Función procedural suelta `leerCsv()` mezclada con lógica de API. | Estrategias polimórficas (`CsvReader`, `XlsxReader`) e intercambiables. | **Estrategia desacoplada y reutilizable** |
+| **Carga Masiva de Puertos** | Script monolítico de 304 líneas en `api/`. | `PuertoBatchImportService` desacoplado de HTTP y JSON. | **Lógica de negocio 100% testeable** |
+| **Suite de Pruebas** | 13 tests (Fase 2). | **23 tests unitarios (89 assertions)** pasando en 0.054s. | **+77% incremento de cobertura** |
 
 ---
 
