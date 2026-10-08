@@ -63,10 +63,10 @@ require_once 'views/header.php';
 <div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border-0" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
+            <div class="d-flex justify-content-between align-items-center bg-white p-3 p-md-4 rounded-4 shadow-sm border-0 flex-wrap gap-2" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
                 <div>
-                    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-link-45deg text-warning me-2"></i>Mapeo Lógico de Hilos</h2>
-                    <p class="text-muted mb-0 mt-1">Configuración manual de empalmes para el <strong>ODF #<?= $odf['id_odf'] ?> (<?= htmlspecialchars($odf['origen'].' / '.$odf['destino']) ?>)</strong> en <strong><?= htmlspecialchars($odf['site_nombre']) ?></strong></p>
+                    <h2 class="fw-bold text-dark mb-0 fs-3 fs-md-2"><i class="bi bi-link-45deg text-warning me-2"></i>Mapeo Lógico de Hilos</h2>
+                    <p class="text-muted mb-0 mt-1 small">Configuración manual de empalmes para el <strong>ODF #<?= $odf['id_odf'] ?> (<?= htmlspecialchars($odf['origen'].' / '.$odf['destino']) ?>)</strong> en <strong><?= htmlspecialchars($odf['site_nombre']) ?></strong></p>
                 </div>
                 <div>
                     <a href="admin_infraestructura.php" class="btn btn-outline-secondary btn-rounded shadow-sm"><i class="bi bi-arrow-left me-1"></i>Volver</a>
@@ -83,10 +83,10 @@ require_once 'views/header.php';
     <?php endif; ?>
 
     <div class="row">
-        <!-- Herramienta de Mapeo en Lote -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm border-0 rounded-4 sticky-top" style="top: 20px;">
-                <div class="card-body p-4">
+        <!-- Herramienta de Mapeo en Lote (Sticky solo en desktop) -->
+        <div class="col-lg-4 col-md-5 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 sticky-md-top" style="top: 20px;">
+                <div class="card-body p-3 p-md-4">
                     <h5 class="fw-bold border-bottom pb-2 mb-3"><i class="bi bi-magic text-primary me-2"></i>Asignación por Lote (Rango)</h5>
                     <p class="small text-muted mb-3">Utilice esta herramienta para autocompletar rápidamente un rango de puertos hacia un mismo cable.</p>
                     

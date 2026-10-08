@@ -32,10 +32,10 @@ require_once 'views/header.php';
 <div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border-0 mb-3" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
+            <div class="d-flex justify-content-between align-items-center bg-white p-3 p-md-4 rounded-4 shadow-sm border-0 mb-3 flex-wrap gap-3" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
                 <div>
-                    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-building-gear text-primary me-2"></i>Inventario de ODF</h2>
-                    <p class="text-muted mb-0 mt-1">Gestión de Sedes (Sites) e Infraestructura Física.</p>
+                    <h2 class="fw-bold text-dark mb-0 fs-3 fs-md-2"><i class="bi bi-building-gear text-primary me-2"></i>Inventario de ODF</h2>
+                    <p class="text-muted mb-0 mt-1 small">Gestión de Sedes (Sites) e Infraestructura Física.</p>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary shadow-sm btn-rounded" data-bs-toggle="modal" data-bs-target="#modalSite"><i class="bi bi-building-add me-1"></i>Nuevo SITE</button>
@@ -57,7 +57,7 @@ require_once 'views/header.php';
     <?php endif; ?>
 
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -83,7 +83,7 @@ require_once 'views/header.php';
                             <td><?= htmlspecialchars($s['distrito']) ?></td>
                             <td class="text-center"><span class="badge bg-secondary rounded-pill px-3"><?= $s['total_cables'] ?></span></td>
                             <td class="text-center"><span class="badge bg-secondary rounded-pill px-3"><?= $s['total_odfs'] ?></span></td>
-                            <td class="text-end">
+                            <td class="text-end text-nowrap">
                                 <a href="admin_site_detalle.php?id_site=<?= $s['id_site'] ?>" class="btn btn-sm btn-primary btn-rounded fw-bold shadow-sm me-2"><i class="bi bi-box-arrow-in-right me-1"></i>Ingresar a Sede</a>
                                 <button class="btn btn-sm btn-light btn-rounded me-1" onclick="editSite(<?= $s['id_site'] ?>, '<?= addslashes($s['nombre']) ?>', '<?= addslashes($s['direccion']) ?>', '<?= addslashes($s['departamento']) ?>', '<?= addslashes($s['distrito']) ?>', '<?= addslashes($s['tipo']) ?>')"><i class="bi bi-pencil"></i></button>
                                 <?php if ($s['total_cables'] > 0 || $s['total_odfs'] > 0): ?>

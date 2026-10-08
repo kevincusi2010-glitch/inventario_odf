@@ -58,7 +58,7 @@ require_once 'views/header.php';
 <div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border-0" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
+            <div class="d-flex justify-content-between align-items-center bg-white p-3 p-md-4 rounded-4 shadow-sm border-0 flex-wrap gap-2" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
                 <div>
                     <h5 class="fw-bold text-dark mb-0 fs-6"><i class="bi bi-diagram-3 text-primary me-1"></i>Infraestructura: <?= htmlspecialchars($siteActual['nombre']) ?></h5>
                     <p class="text-muted mb-0 mt-1 small">Estructura de Racks, Cables y ODFs en <?= htmlspecialchars($siteActual['departamento'] . ', ' . $siteActual['distrito']) ?>.</p>
@@ -78,7 +78,7 @@ require_once 'views/header.php';
     <?php endif; ?>
 
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
             <?php foreach ($tree as $siteId => $siteData): $s = $siteData['info']; ?>
                 <!-- NODO RAÍZ: SEDE (SITE) -->
                 <div class="tree-node ms-0 ps-0 border-0 site-node-container">

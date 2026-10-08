@@ -28,20 +28,22 @@ require_once 'views/header.php';
 <div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border-0" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
+            <div class="d-flex justify-content-between align-items-center bg-white p-3 p-md-4 rounded-4 shadow-sm border-0 flex-wrap gap-3" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
                 <div>
-                    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Estadísticas y Reportes</h2>
-                    <p class="text-muted mb-0 mt-1">Métricas de ocupación y capacidad instalada por sede.</p>
+                    <h2 class="fw-bold text-dark mb-0 fs-3 fs-md-2"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Estadísticas y Reportes</h2>
+                    <p class="text-muted mb-0 mt-1 small">Métricas de ocupación y capacidad instalada por sede.</p>
                 </div>
-                <div>
-                    <form method="GET" class="d-flex shadow-sm rounded">
-                        <span class="input-group-text bg-primary text-white border-0 rounded-start"><i class="bi bi-geo-alt-fill"></i></span>
-                        <select name="id_site" class="form-select border-0 bg-white" onchange="this.form.id_odf.value=''; this.form.submit()" style="min-width: 250px;">
-                            <?php foreach($sites as $s): ?>
-                                <option value="<?= $s['id_site'] ?>" <?= $s['id_site']==$selected_site?'selected':'' ?>><?= htmlspecialchars($s['nombre']) ?> (<?= htmlspecialchars($s['departamento']) ?>)</option>
-                            <?php endforeach; ?>
-                        </select>
-                        <select name="id_odf" class="form-select border-0 bg-white ms-2" onchange="this.form.submit()" style="min-width: 200px;">
+                <div class="w-100 w-lg-auto">
+                    <form method="GET" class="d-flex flex-column flex-sm-row gap-2 shadow-sm rounded p-1 bg-white border">
+                        <div class="input-group">
+                            <span class="input-group-text bg-primary text-white border-0"><i class="bi bi-geo-alt-fill"></i></span>
+                            <select name="id_site" class="form-select border-0 bg-white" onchange="this.form.id_odf.value=''; this.form.submit()">
+                                <?php foreach($sites as $s): ?>
+                                    <option value="<?= $s['id_site'] ?>" <?= $s['id_site']==$selected_site?'selected':'' ?>><?= htmlspecialchars($s['nombre']) ?> (<?= htmlspecialchars($s['departamento']) ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <select name="id_odf" class="form-select border-0 bg-light" onchange="this.form.submit()">
                             <option value="">Todos los ODFs</option>
                             <?php foreach($odfsForSite as $o): ?>
                                 <option value="<?= $o['id_odf'] ?>" <?= $o['id_odf']==$selected_odf?'selected':'' ?>>ODF: <?= htmlspecialchars($o['origen'] . ' ' . $o['destino']) ?></option>
@@ -55,47 +57,47 @@ require_once 'views/header.php';
     
     <?php if ($selected_site): ?>
     
-    <!-- KPIs -->
-    <div class="row mb-4">
-        <div class="col-md-3">
+    <!-- KPIs (2x2 en móviles, 4 en desktop) -->
+    <div class="row g-2 g-md-4 mb-4">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 rounded-4 bg-white h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="display-4 text-primary fw-bold mb-2"><?= $stats['total_cables'] ?></div>
-                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-bezier2 me-1"></i> Cables Instalados</div>
+                <div class="card-body p-3 p-md-4 text-center">
+                    <div class="display-6 display-md-4 text-primary fw-bold mb-2"><?= $stats['total_cables'] ?></div>
+                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-bezier2 me-1"></i> Cables</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 rounded-4 bg-white h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="display-4 text-dark fw-bold mb-2"><?= $stats['capacidad_hilos'] ?></div>
-                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-layers me-1"></i> Hilos Disponibles</div>
+                <div class="card-body p-3 p-md-4 text-center">
+                    <div class="display-6 display-md-4 text-dark fw-bold mb-2"><?= $stats['capacidad_hilos'] ?></div>
+                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-layers me-1"></i> Hilos</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 rounded-4 bg-white h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="display-4 text-info fw-bold mb-2"><?= $stats['total_odfs'] ?></div>
-                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-motherboard me-1"></i> Equipos ODF</div>
+                <div class="card-body p-3 p-md-4 text-center">
+                    <div class="display-6 display-md-4 text-info fw-bold mb-2"><?= $stats['total_odfs'] ?></div>
+                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-motherboard me-1"></i> ODFs</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0 rounded-4 bg-white h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="display-4 text-success fw-bold mb-2"><?= $stats['puertos_totales'] ?></div>
-                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-usb-plug me-1"></i> Puertos Totales</div>
+                <div class="card-body p-3 p-md-4 text-center">
+                    <div class="display-6 display-md-4 text-success fw-bold mb-2"><?= $stats['puertos_totales'] ?></div>
+                    <div class="text-muted text-uppercase small fw-bold"><i class="bi bi-usb-plug me-1"></i> Puertos</div>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Ocupación de Puertos -->
-    <div class="row">
-        <div class="col-md-8">
+    <div class="row g-3 g-md-4">
+        <div class="col-lg-8">
             <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-5">
+                <div class="card-body p-3 p-sm-4 p-md-5">
                     <h5 class="fw-bold mb-4">Distribución de Puertos ODF</h5>
                     
                     <?php 

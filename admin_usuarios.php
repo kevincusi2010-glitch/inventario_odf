@@ -23,10 +23,10 @@ require_once 'views/header.php';
 <div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border-0 mb-3" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
+            <div class="d-flex justify-content-between align-items-center bg-white p-3 p-md-4 rounded-4 shadow-sm border-0 mb-3 flex-wrap gap-3" style="background: linear-gradient(to right, #ffffff, #f8fafc);">
                 <div>
-                    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill text-primary me-2"></i>Gestión de Usuarios</h2>
-                    <p class="text-muted mb-0 mt-1">Administración de cuentas, roles y accesos al sistema.</p>
+                    <h2 class="fw-bold text-dark mb-0 fs-3 fs-md-2"><i class="bi bi-people-fill text-primary me-2"></i>Gestión de Usuarios</h2>
+                    <p class="text-muted mb-0 mt-1 small">Administración de cuentas, roles y accesos al sistema.</p>
                 </div>
                 <div>
                     <button class="btn btn-primary shadow-sm btn-rounded fw-bold" data-bs-toggle="modal" data-bs-target="#modalUsuario"><i class="bi bi-person-plus-fill me-1"></i>Nuevo Usuario</button>
@@ -84,7 +84,7 @@ require_once 'views/header.php';
                                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill"><i class="bi bi-x-circle-fill me-1"></i>Inactivo</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="text-end pe-4">
+                                    <td class="text-end pe-4 text-nowrap">
                                         <button class="btn btn-sm btn-light btn-rounded me-1" onclick="editUsuario(<?= $u['id_usuario'] ?>, '<?= addslashes($u['nombre']) ?>', '<?= addslashes($u['correo']) ?>', '<?= $u['rol'] ?>')" title="Editar Datos"><i class="bi bi-pencil"></i></button>
                                         
                                         <form action="api/crud_usuarios.php" method="POST" class="d-inline m-0" onsubmit="return confirm('¿Restablecer la contraseña a telefonica123?');">

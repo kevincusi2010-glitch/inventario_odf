@@ -45,10 +45,10 @@ try {
 
 </div>
 <?php else: ?>
-<div class="container-fluid px-4 py-3">
-    <div class="row g-4 h-100">
+<div class="container-fluid px-2 px-sm-3 px-md-4 py-3">
+    <div class="row g-3 g-md-4 h-100">
         <!-- BARRA LATERAL: buscador y acordeón de sedes con sus ODF -->
-        <div class="col-xl-2 col-lg-3 col-md-4 ps-0">
+        <div class="col-xl-2 col-lg-3 col-md-4 ps-md-0 mb-3 mb-md-0">
             <div class="premium-sidebar p-3 h-100 w-100">
                 <div class="d-flex align-items-center mb-3 text-white">
                     <i class="bi bi-router fs-4 me-2"></i>
@@ -93,30 +93,30 @@ try {
 
         <!-- PANEL CENTRAL: matriz de puertos del ODF e indicadores del sitio -->
         <div class="col-xl-7 col-lg-6 col-md-8">
-            <!-- Estadísticas Arriba -->
-            <div class="row g-3 mb-4">
-                <div class="col-sm-3">
-                    <div class="stat-card p-3 d-flex align-items-center">
-                        <div class="icon-badge bg-primary bg-opacity-10 text-primary me-3"><i class="bi bi-cpu fs-5"></i></div>
+            <!-- Estadísticas Arriba (2x2 en móvil, 4 en desktop) -->
+            <div class="row g-2 g-sm-3 mb-4">
+                <div class="col-6 col-sm-6 col-xl-3">
+                    <div class="stat-card p-3 d-flex align-items-center h-100">
+                        <div class="icon-badge bg-primary bg-opacity-10 text-primary me-2 me-sm-3"><i class="bi bi-cpu fs-5"></i></div>
                         <div><div class="text-muted small fw-bold">Total Puertos</div><h4 class="mb-0 fw-bold" id="stat-total">0</h4></div>
                     </div>
                 </div>
-                <div class="col-sm-3">
-                    <div class="stat-card p-3 d-flex align-items-center">
-                        <div class="icon-badge bg-secondary bg-opacity-10 text-secondary me-3"><i class="bi bi-circle-fill fs-5"></i></div>
+                <div class="col-6 col-sm-6 col-xl-3">
+                    <div class="stat-card p-3 d-flex align-items-center h-100">
+                        <div class="icon-badge bg-secondary bg-opacity-10 text-secondary me-2 me-sm-3"><i class="bi bi-circle-fill fs-5"></i></div>
                         <div><div class="text-muted small fw-bold">Sin Servicio</div><h4 class="mb-0 fw-bold" id="stat-sinservicio">0</h4></div>
                     </div>
                 </div>
-                <div class="col-sm-3">
-                    <div class="stat-card p-3 d-flex align-items-center">
-                        <div class="icon-badge bg-success bg-opacity-10 text-success me-3"><i class="bi bi-check-circle-fill fs-5"></i></div>
+                <div class="col-6 col-sm-6 col-xl-3">
+                    <div class="stat-card p-3 d-flex align-items-center h-100">
+                        <div class="icon-badge bg-success bg-opacity-10 text-success me-2 me-sm-3"><i class="bi bi-check-circle-fill fs-5"></i></div>
                         <div><div class="text-muted small fw-bold">En Servicio</div><h4 class="mb-0 fw-bold" id="stat-enservicio">0</h4></div>
                     </div>
                 </div>
-                <div class="col-sm-3">
-                    <div class="stat-card p-3 d-flex align-items-center">
-                        <div class="icon-badge bg-danger bg-opacity-10 text-danger me-3"><i class="bi bi-x-circle-fill fs-5"></i></div>
-                        <div><div class="text-muted small fw-bold">Alertas (Malogrados)</div><h4 class="mb-0 fw-bold" id="stat-alertas">0</h4></div>
+                <div class="col-6 col-sm-6 col-xl-3">
+                    <div class="stat-card p-3 d-flex align-items-center h-100">
+                        <div class="icon-badge bg-danger bg-opacity-10 text-danger me-2 me-sm-3"><i class="bi bi-x-circle-fill fs-5"></i></div>
+                        <div><div class="text-muted small fw-bold">Alertas</div><h4 class="mb-0 fw-bold" id="stat-alertas">0</h4></div>
                     </div>
                 </div>
             </div>
