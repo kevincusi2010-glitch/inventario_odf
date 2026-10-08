@@ -15,8 +15,6 @@ if (!isset($_SESSION['usuario'])) {
 }
 require_once 'config/database.php';
 require_once 'classes/Csrf.php';
-require_once 'classes/Infraestructura.php';
-require_once 'classes/Puerto.php';
 require_once 'views/header.php';
 
 $sites = [];
