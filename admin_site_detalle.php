@@ -53,19 +53,7 @@ $tree = [$id_site => $treeBuilder->buildTree($siteActual, $odfs, $cables, $ports
 require_once 'views/header.php';
 ?>
 
-<style>
-.tree-node { position: relative; margin-left: 20px; border-left: 2px solid #e2e8f0; padding-left: 20px; padding-bottom: 10px; }
-.tree-node::before { content: ''; position: absolute; top: 18px; left: -2px; width: 20px; height: 2px; background-color: #e2e8f0; }
-.node-content { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-.node-content:hover { border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.node-title { display: flex; align-items: center; cursor: pointer; user-select: none; flex-grow: 1; }
-.node-title i { font-size: 1.2rem; margin-right: 12px; }
-.toggle-icon { transition: transform 0.3s; margin-right: 10px; color: #94a3b8; }
-.collapsed .toggle-icon { transform: rotate(-90deg); }
-.children-container { overflow: hidden; transition: max-height 0.3s ease-out; }
-.children-container.collapsed { display: none; }
-.badge-soft { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-weight: 500; }
-</style>
+
 
 <div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row mb-4">

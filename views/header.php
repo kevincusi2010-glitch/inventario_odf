@@ -16,13 +16,7 @@ require_once __DIR__ . '/../classes/Csrf.php'; ?>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #f4f6f9; }
-        .navbar-telefonica { background-color: #003245; }
-        .puerto-btn { width: 100%; height: 50px; font-weight: bold; position: relative;}
-        .puerto-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 10px; }
-        .industrial-panel { background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    </style>
+    <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-telefonica mb-4">
