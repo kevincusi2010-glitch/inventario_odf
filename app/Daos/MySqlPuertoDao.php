@@ -121,10 +121,17 @@ class MySqlPuertoDao implements PuertoDaoInterface
     public function getRecentActivity(int $odfId, int $limit = 15): array
     {
         $stmt = $this->pdo->prepare("
-            SELECT h.estado_nuevo, h.observacion, h.fecha_cambio, p.posicion, u.nombre as usuario 
+            SELECT h.estado_anterior,
+                   h.estado_nuevo, 
+                   h.observacion, 
+                   h.fecha_cambio, 
+                   p.posicion, 
+                   u.nombre as usuario,
+                   CONCAT_WS(' → ', c.origen, c.destino) AS cable_enlace
             FROM HistorialCambiosPuerto h 
             JOIN Puerto p ON h.id_puerto = p.id_puerto 
-            JOIN Usuario u ON h.id_usuario = u.id_usuario 
+            LEFT JOIN Usuario u ON h.id_usuario = u.id_usuario 
+            LEFT JOIN CableAlimentacion c ON p.id_cable_conectado = c.id_cable
             WHERE p.id_odf = ? 
             ORDER BY h.fecha_cambio DESC 
             LIMIT ?

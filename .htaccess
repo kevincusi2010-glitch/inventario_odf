@@ -1,0 +1,16 @@
+# Bloquear acceso a archivos sensibles y ocultos (.env, logs, etc.)
+<FilesMatch "^\.|\.(env|log|sql|lock|json)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirigir la raíz hacia el directorio público
+    RewriteRule ^$ public/ [L]
+
+    # Redirigir el resto de solicitudes no estáticas hacia public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+

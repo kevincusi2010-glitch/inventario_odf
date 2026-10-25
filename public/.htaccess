@@ -1,0 +1,18 @@
+# Cabeceras defensivas HTTP
+<IfModule mod_headers.c>
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Reglas de enrutamiento para el directorio público de Inventario ODF
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si el archivo o directorio solicitado existe físicamente en public/, servirlo directamente
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # De lo contrario, canalizar la petición hacia el Front Controller
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

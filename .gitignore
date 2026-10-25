@@ -9,8 +9,7 @@ composer.phar
 /logs/*.log
 !/logs/.gitkeep
 
-# Cache de pruebas
+# Pruebas y caché
 .phpunit.result.cache
 
-# Entornos virtuales locales
-/.venv/
+

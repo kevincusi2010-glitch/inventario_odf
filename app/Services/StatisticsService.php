@@ -20,7 +20,12 @@ class StatisticsService
     {
         $stmt = $this->pdo->prepare("SELECT id_odf, origen, destino, ubicacion_rack FROM ODF WHERE id_site = ? AND activo = 1 ORDER BY id_odf ASC");
         $stmt->execute([$siteId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+        $index = 1;
+        foreach ($rows as &$r) {
+            $r['local_index'] = $index++;
+        }
+        return $rows;
     }
 
     public function calculateStats(int $siteId, ?int $odfId = null): array

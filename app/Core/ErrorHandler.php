@@ -25,7 +25,7 @@ class ErrorHandler
             if (!is_dir($logDir)) {
                 @mkdir($logDir, 0755, true);
             }
-            self::$logFile = $logDir . '/app.log';
+            self::$logFile = $logDir . '/app-' . date('Y-m-d') . '.log';
         } else {
             self::$logFile = $logPath;
         }
@@ -94,15 +94,26 @@ class ErrorHandler
      */
     public static function log(Throwable $e): void
     {
-        if (self::$logFile === null) {
-            return;
+        $logDir = dirname(__DIR__, 2) . '/logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0755, true);
         }
+        $targetFile = self::$logFile ?? ($logDir . '/app-' . date('Y-m-d') . '.log');
 
         $timestamp = date('Y-m-d H:i:s');
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+        $uri = $_SERVER['REQUEST_URI'] ?? 'CLI';
+        $userId = $_SESSION['usuario']['id_usuario'] ?? 'unauthenticated';
+
         $entry = sprintf(
-            "[%s] [%s] %s in %s on line %d\nStack Trace:\n%s\n%s\n",
+            "[%s] [%s] [%s %s] [User:%s] [IP:%s] %s in %s on line %d\nStack Trace:\n%s\n%s\n",
             $timestamp,
             get_class($e),
+            $method,
+            $uri,
+            $userId,
+            $ip,
             $e->getMessage(),
             $e->getFile(),
             $e->getLine(),
@@ -110,7 +121,7 @@ class ErrorHandler
             str_repeat('-', 80)
         );
 
-        @file_put_contents(self::$logFile, $entry, FILE_APPEND | LOCK_EX);
+        @file_put_contents($targetFile, $entry, FILE_APPEND | LOCK_EX);
     }
 
     private static function isJsonRequest(): bool

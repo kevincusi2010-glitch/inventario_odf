@@ -29,10 +29,19 @@ class PuertoBatchImportService
     ) {}
 
     /**
-     * Procesa e importa un archivo de puertos para un ODF determinado.
+     * Procesa e importa por lote un archivo de puertos (CSV/XLSX) para un ODF determinado.
      *
-     * @return array{success: bool, updated_count: int, message: string}
-     * @throws RuntimeException Si el archivo tiene errores de validación.
+     * Aplica el patrón Strategy para la deserialización del archivo tabular,
+     * valida reglas de negocio (rango de puertos, unicidad de hilos y permisos RBAC)
+     * y ejecuta las actualizaciones de forma atómica bajo una transacción ACID.
+     *
+     * @param string              $filePath  Ruta absoluta del archivo temporal subido.
+     * @param int                 $odfId     Identificador del distribuidor ODF destino.
+     * @param int                 $userId    ID del operador que ejecuta la importación.
+     * @param RolePolicyInterface $policy    Política de autorización del rol en sesión.
+     * @return array{success: bool, updated_count: int, message: string} Resumen del proceso de importación.
+     * @throws InvalidArgumentException Si el ODF no existe o el formato de archivo es inválido.
+     * @throws RuntimeException          Si el archivo tiene errores estructurales o colisiones ópticas.
      */
     public function import(string $filePath, int $odfId, int $userId, RolePolicyInterface $policy): array
     {
@@ -198,10 +207,12 @@ class PuertoBatchImportService
         }
 
         // Aplicar todas las actualizaciones en una sola transacción atómica
-        DatabaseConnection::transaction($this->pdo, function () use ($updates, $userId) {
+        DatabaseConnection::transaction($this->pdo, function () use ($updates, $userId, $odfId) {
             foreach ($updates as $u) {
                 $this->puertoDao->updateEstado($u['id_puerto'], $u['estado'], $u['descripcion'], $userId, $u['bloqueado']);
-                $this->puertoDao->assignThread($u['id_puerto'], $u['posicion'], $u['id_cable'], $u['numero_hilo']);
+                // assignThread() espera (id_odf, posicion); pasar id_puerto hacía que
+                // el UPDATE no encontrara ninguna fila y el hilo nunca se empalmara.
+                $this->puertoDao->assignThread($odfId, $u['posicion'], $u['id_cable'], $u['numero_hilo']);
             }
         });
 
