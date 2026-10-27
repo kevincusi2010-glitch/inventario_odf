@@ -119,14 +119,7 @@ El flujo de trabajo dentro de **ODF Tracker** está pensado para ser ágil, intu
 
 ---
 
-## 🔑 Credenciales de Acceso de Prueba
-
-El sistema cuenta con un usuario administrador preconfigurado para pruebas:
-
-- **Usuario / Correo:** `admin@telefonica.com`
-- **Contraseña:** `admin123`
-
 ---
 
 ### 📄 Licencia y Uso
-Sistema de uso técnico para la gestión, mantenimiento y monitoreo de infraestructura de fibra óptica y telecomunicaciones.
+Proyecto Universitario de sistema de uso técnico para la gestión, mantenimiento y monitoreo de infraestructura de fibra óptica y telecomunicaciones.
